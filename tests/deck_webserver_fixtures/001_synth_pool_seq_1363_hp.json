@@ -1,0 +1,18 @@
+{
+ "id": "synth_pool_seq_1363",
+ "round": "R1",
+ "scope": "hairpin",
+ "job_id": "NIwarYYkED",
+ "job_url": "http://rna.tbi.univie.ac.at/RNAfold/NIwarYYkED/",
+ "svg_url": "http://rna.tbi.univie.ac.at/RNAfold/NIwarYYkED/synth_pool_s_ss.svg",
+ "mfe": "-8.70",
+ "seq": "GCAAUAGAUAUUGGUUUGAAACCCUACAAGUGCUUUUAUAAUCGGUUCUCUUGCCGCCACCAUG",
+ "structure": "((((.(((.((((((((((((............))))).)))))))))).))))..........",
+ "temp": "37",
+ "page_temp_is_requested": true,
+ "page_seq_is_fullength": true,
+ "drawing_seq_is_fullength": true,
+ "verified": true,
+ "png_sha256": "eadf0946e61ad279751b075f32b83eaa67347828cd4a7c4e5792b4802866f25f",
+ "png_svg_sha256": "4314f4d2cdd16710600688b9111525b96dc0c9a6e129b1046f6f9e12abd0dff8"
+}

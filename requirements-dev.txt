@@ -1,0 +1,5 @@
+# Tests and packaging (not needed to run RSAS)
+-r requirements.txt
+pytest>=7
+setuptools>=68.0
+pyinstaller>=6.0

@@ -4,6 +4,47 @@ All notable changes to RSAS (RNA Structure Analysis Suite) will be documented he
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [4.0.0] - 2026-11-03
+
+### Added
+- **About page** (sidebar, and *RSAS > About RSAS* on macOS): version, how to cite RSAS, and the contacts
+  (Michael M. Abdelsayed, Luiz Passalacqua) with clickable e-mail addresses.
+- **RNAfold Deck** (sidebar page, `RnaThermofinder/deck/`): selects the hairpins of one or more
+  `HP_Quality_Score_Class` tiers from RSAS Excel results, traces each to its full-length sequence, folds the
+  full-length sequence and/or the hairpin at 1-5 temperatures and builds a PowerPoint with one verified slide per
+  fold, plus a selection workbook, a verification CSV and per-fold JSON/SVG/PNG. Integrated from RNAfold Deck
+  1.3.0, with the RNAfold-webserver submission and the Chrome screenshot replaced by local ViennaRNA folding
+  (`-p -d2 --noLP`, Turner 2004) and a local drawing (naview layout, base-pair-probability colors). No internet or
+  browser needed; folds run in parallel processes. `tests/test_deck_local.py` checks that five saved webserver
+  jobs are reproduced exactly (MFE, structure, per-nucleotide colors, coordinates). Each fold is also
+  cross-checked against the RSAS sheet (MFE and structure at the same temperature). Also available as
+  `python -m RnaThermofinder.deck run ...`.
+- **Export button on the Results page** (same action as on the Analyze page), plus **Open Results Folder**.
+- **One folder per analysis, named after the input**: every analysis run writes into a new folder
+  `~/RSAS/<input>_<YYYYmmdd_HHMMSS>/`, and every file in it starts with the input file's name (extension
+  removed): `<input>_rna_results.csv/.xlsx`, `<input>_run_log.txt` and `<input>_run_info.json` (input path,
+  versions, temperatures, settings, file list). Earlier runs are never overwritten. RNArobo and Knotty
+  exports go to `~/RSAS/<input>_rnarobo_<ts>/` and `~/RSAS/<input>_knotty_<ts>/`
+  (`<input>_rnarobo_results.tsv` + `<input>_rnarobo_descriptor.des`, `<input>_knotty_results.csv`); the
+  Sequence Extractor suggests `<genome>_extracted_sequences.fasta`. The RNAfold Deck names the deck
+  `<input>_RNAfold_deck_<ts>`, saves it inside that analysis's folder, and prefixes every per-fold file with
+  `<input>_`. `calculate_results_final(..., file_prefix=...)` (scripts without it keep the old names).
+- **Installation for every platform** ([INSTALL.md](../INSTALL.md)): Conda (`environment.yml` for Linux/macOS,
+  `environment-windows.yml` for Windows), Docker (`Dockerfile`), and native venv + pip on Windows, macOS and
+  Linux, with the optional RNArobo/Knotty engines, verification and troubleshooting. `requirements.txt` now
+  installs ViennaRNA from its official PyPI wheels; build/test tools moved to `requirements-dev.txt`.
+- **Command line** (`python -m RnaThermofinder` / `rsas-cli`): `analyze` (same pipeline and per-run output
+  folder as the GUI), `deck`, `gui`, `version`. `pip install -e .` also installs the `rsas` GUI command.
+
+### Fixed
+- Sequence Extractor: the error dialog after a failed fetch or extraction raised `NameError` (the exception
+  variable was read by a callback after the `except` block ended).
+
+### Changed
+- Minimum Python is 3.10 (the oldest version with ViennaRNA wheels).
+- `python-pptx`, `matplotlib`, `pillow` and `lxml` added to the requirements; the PyInstaller build no longer
+  excludes matplotlib and collects python-pptx's templates.
+
 ## [Unreleased]
 
 ### Removed

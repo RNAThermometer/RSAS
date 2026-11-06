@@ -1,0 +1,15 @@
+{
+ "id": "synth_pool_seq_18746",
+ "round": "R1",
+ "job_id": "zQxM94T_DO",
+ "job_url": "http://rna.tbi.univie.ac.at/RNAfold/zQxM94T_DO/",
+ "svg_url": "http://rna.tbi.univie.ac.at/RNAfold/zQxM94T_DO/synth_pool_s_ss.svg",
+ "mfe": "-8.10",
+ "seq": "UCUGAGAAGAUCGAUUGCCAUUUGCCCGUGUUUCGUAUGACUUGAAAUAACCAGAAUUAUAACAGAUGAGAUAUUAAUCCCACUCCAAGCCGCCACCAUG",
+ "structure": "...(((..(((.(((...((((((....(((((((.......))))))).............))))))....))).)))...)))...............",
+ "page_seq_is_fullength": true,
+ "drawing_seq_is_fullength": true,
+ "verified": true,
+ "png_sha256": "e4727455fd269dd6ffbac64593a050e904ad8d7978b532831f887f1d9cdf16e4",
+ "png_svg_sha256": "531d954cda89a60120f1c6435d59636a70bb99cf76580542e7de8f397640a7b0"
+}

@@ -1,0 +1,25 @@
+# Conda environment for RSAS on Windows (win-64).
+# Bioconda has no Windows build of ViennaRNA, so it comes from PyPI (official wheel, same version).
+# RNArobo and Knotty are not available natively on Windows; use WSL2 for those two tools.
+name: rsas
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - numpy>=1.20
+  - openpyxl>=3.1
+  - biopython>=1.80
+  - tk
+  - python-pptx>=1.0
+  - matplotlib-base>=3.7
+  - pillow>=10
+  - lxml>=5
+  - pytest
+  - pip
+  - pip:
+      - ViennaRNA>=2.6              # folding engine (official wheel)
+      - customtkinter>=5.2,<6       # 5.x is published on PyPI and bioconda, not conda-forge
+  # Optional: only needed to build the standalone executable
+  - setuptools>=68
+  - pyinstaller>=6.0

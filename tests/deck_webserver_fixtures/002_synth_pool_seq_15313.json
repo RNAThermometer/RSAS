@@ -1,0 +1,15 @@
+{
+ "id": "synth_pool_seq_15313",
+ "round": "R1",
+ "job_id": "mDgzAmo5HY",
+ "job_url": "http://rna.tbi.univie.ac.at/RNAfold/mDgzAmo5HY/",
+ "svg_url": "http://rna.tbi.univie.ac.at/RNAfold/mDgzAmo5HY/synth_pool_s_ss.svg",
+ "mfe": "-9.20",
+ "seq": "UACAUCAAUUAUAUAUGUACUGACCUGACUGUUUUUCUGAUAGAUACUUUAAGAGGAUCUUACUUAGAUAGUUUUCCCUACCUCCUCAGCCGCCACCAUG",
+ "structure": "(((((.........)))))((((...((((((((.......(((..(((...)))..))).....))))))))............))))...........",
+ "page_seq_is_fullength": true,
+ "drawing_seq_is_fullength": true,
+ "verified": true,
+ "png_sha256": "67b9552c13586dc189d4829fcf895a00be7fa7425a0f5dd4173ca5d210bacbbf",
+ "png_svg_sha256": "d69dff88e38c7fa66f039bf859e53188f820d84e6768b637956604fc6000b2a5"
+}

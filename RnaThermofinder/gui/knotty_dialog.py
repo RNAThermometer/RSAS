@@ -16,6 +16,8 @@ from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
+from settings_manager import input_stem, new_run_dir, remove_if_empty
+
 from RnaThermofinder.utils.knotty_wrapper import (
     check_knotty_available,
     run_knotty_batch,
@@ -43,15 +45,18 @@ def _sanitize_csv(value) -> str:
 class KnottyDialog:
     """Dialog for running Knotty pseudoknot predictions."""
 
-    def __init__(self, parent, *, sequences=None):
+    def __init__(self, parent, *, sequences=None, input_name=None):
         """
         Args:
             parent: Parent Tk widget.
             sequences: Optional list of dicts with 'name' and 'sequence' keys
                        (pre-loaded from the main app).
+            input_name: Name of the main app's input file (without extension); names the exported files.
         """
         self.parent = parent
         self._sequences = sequences or []
+        self._input_name = input_name
+        self._run_stem = None
         self._results: list[KnottyResult] = []
         self._running = False
         self._cancel_event = threading.Event()
@@ -98,7 +103,7 @@ class KnottyDialog:
         # ── Status banner ─────────────────────────────────────────────
         available, msg = check_knotty_available()
         status_color = SUCCESS if available else ERROR
-        status_text = "Knotty available" if available else "Knotty not found"
+        status_text = "Knotty available" if available else "Knotty not found (see INSTALL.md, section 8)"
         status_frame = ctk.CTkFrame(self.dialog, fg_color=status_color, corner_radius=6, height=32)
         status_frame.grid(row=row, column=0, sticky="ew", padx=12, pady=(12, 4))
         status_frame.grid_propagate(False)
@@ -309,6 +314,8 @@ class KnottyDialog:
             return
 
         sequences = self._load_sequences()
+        fasta_path = self.fasta_var.get().strip()
+        self._run_stem = input_stem(fasta_path) if fasta_path else (self._input_name or "knotty")
         if not sequences:
             messagebox.showwarning("No Sequences",
                                    "Load sequences in the main app or provide a FASTA file.",
@@ -419,14 +426,23 @@ class KnottyDialog:
             messagebox.showinfo("No Results", "Run the prediction first.", parent=self.dialog)
             return
 
+        # each prediction is saved in its own folder, named after the input FASTA:
+        # ~/RSAS/<input>_knotty_<timestamp>/<input>_knotty_results.csv
+        stem = self._run_stem or self._input_name or "knotty"
+        run_dir = new_run_dir(stem, "knotty")
         path = filedialog.asksaveasfilename(
             parent=self.dialog,
             title="Export Results",
+            initialdir=str(run_dir),
+            initialfile=f"{stem}_knotty_results.csv",
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
         )
         if not path:
+            remove_if_empty(run_dir)
             return
+        if Path(path).parent.resolve() != run_dir.resolve():
+            remove_if_empty(run_dir)                      # the user picked another folder
 
         try:
             with open(path, "w", newline="", encoding="utf-8") as f:

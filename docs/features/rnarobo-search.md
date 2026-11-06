@@ -168,7 +168,7 @@ To restrict the stem to canonical Watson-Crick pairs only (no G-U wobble), chang
 
 ## Limitations and gotchas
 
-- **The `rnarobo` binary ships for macOS only.** The repository bundles a macOS build at `bin/macos/rnarobo`. On Windows or Linux there is no bundled binary, so the status line shows the engine as not found until you supply one. Build `rnarobo` for your platform and either put it on your system `PATH` or drop it in `bin/<platform>/` (`bin/linux/rnarobo` or `bin/windows/rnarobo.exe`); RSAS picks it up automatically on the next launch.
+- **The `rnarobo` binary ships for macOS only.** The repository bundles a macOS build at `bin/macos/rnarobo`. On Linux, download the ready-made executable published by RNArobo's authors (`https://compbio.fmph.uniba.sk/rnarobo/rnarobo-2.1.0-linux64`) into `bin/linux/rnarobo` of your RSAS folder, or build it from source; on Windows, use WSL2. No administrator rights are needed, and RSAS picks the binary up automatically on the next launch. Commands: [INSTALL.md, section 8](../../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
 - **The name's first letter decides the type, inside RNArobo.** This is an RNArobo design, not an RSAS one. RSAS guards against it, but it is why you cannot name a helix `stem1`, the engine would read the leading `s` and treat it as single-stranded.
 - **Wildcards flanked on both sides hang the engine.** `N*N` (or any `*` with nucleotides before and after it) triggers exponential backtracking in RNArobo. RSAS blocks this at validation time; keep `*` at the start or end of a single-stranded pattern.
 - **The parser expects the default tabular output.** That is why RNArobo's FASTA-output flag (`-f`) is not exposed; turning it on would produce output the result parser cannot read.
@@ -179,7 +179,7 @@ To restrict the stem to canonical Watson-Crick pairs only (no G-U wobble), chang
 ## Troubleshooting
 
 **The status line shows a red cross / "RNArobo not found".**
-The binary could not be resolved from the frozen bundle, `bin/<platform>/`, or `PATH`. On macOS, confirm `bin/macos/rnarobo` exists and is executable. On Windows or Linux, you need to supply your own build (see Limitations above), place it on `PATH` or in `bin/<platform>/` and reopen the dialog. The **Run Search** button stays disabled until a binary is found.
+The binary could not be resolved from the frozen bundle, `bin/<platform>/`, or `PATH`. On macOS, confirm `bin/macos/rnarobo` exists and is executable; if macOS says it *cannot be verified*, run `xattr -dr com.apple.quarantine bin/macos` or allow it under System Settings → Privacy & Security → **Open Anyway** ([INSTALL.md, section 7.4](../../INSTALL.md#74-macos-security-warnings-gatekeeper)). On Linux, download RNArobo into `bin/linux/` of your RSAS folder (see Limitations above and [INSTALL.md, section 8](../../INSTALL.md#8-optional-engines-rnarobo-and-knotty)) and reopen the dialog. The **Run Search** button stays disabled until a binary is found.
 
 **The search exits with a non-zero status and no clear error.**
 RSAS reports the exit code even when RNArobo prints nothing to stderr, and the usual cause is a descriptor the engine rejected. Re-read the **Descriptor Preview**: check that every element name in the motif map has a spec, that helix names start with `h` and relational with `r`, and that no single-stranded pattern has a `*` in the middle. The validator catches most of these before the run, but a malformed strand pattern can still make the engine unhappy.

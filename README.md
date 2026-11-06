@@ -4,7 +4,7 @@
 
 # RSAS: RNA Structure Analysis Suite
 
-**v3.2**
+**v4.0**
 
 A desktop app for finding RNA thermometers, riboswitches, and other regulatory structures in bacterial sequences.
 
@@ -18,7 +18,7 @@ You give it a pool of candidate sequences. It folds each one at the temperatures
 
 ## The 60-second version
 
-1. Install ViennaRNA (`brew install viennarna`), then run from source: `pip install -r requirements.txt && python main.py`. Or grab a pre-built app when a release has one attached.
+1. Install ViennaRNA (`brew install viennarna`), then run from source: `pip install -r requirements.txt && python main.py`. Or grab a pre-built app when a release has one attached (on macOS, if it says the app *is damaged*, see [below](#macos-rsas-is-damaged-and-cant-be-opened)).
 2. Drag a FASTA file onto the window.
 3. Click **Analyze**. RSAS folds every sequence at 25, 37, and 42 °C (change these to whatever your biology needs), locates the hairpin and the RBS, and works out how paired the RBS is at each temperature.
 4. Click **Export**. You get an Excel workbook and a CSV, with the best thermometer candidates sorted to the top.
@@ -73,11 +73,15 @@ Pull the region upstream (or downstream) of a genomic feature straight from loca
 
 ### Structural motif search (RNArobo)
 
-Search for *structural* motifs, patterns defined by paired helices and loops rather than a flat string, using the bundled [RNArobo](https://github.com/rampasek/RNArobo) 2.1.0 engine. You build a descriptor from helices (`h`), single-stranded regions (`s`), and relational elements (`r`), each with its own tolerance for mismatches, mispairs, and insertions. There's a preset list and an interactive builder. The `rnarobo` binary ships for macOS; on Windows or Linux you'll need it on your PATH.
+Search for *structural* motifs, patterns defined by paired helices and loops rather than a flat string, using the bundled [RNArobo](https://github.com/rampasek/RNArobo) 2.1.0 engine. You build a descriptor from helices (`h`), single-stranded regions (`s`), and relational elements (`r`), each with its own tolerance for mismatches, mispairs, and insertions. There's a preset list and an interactive builder. The `rnarobo` binary ships for macOS; on Linux, download the authors' ready-made executable into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
 
 ### Pseudoknot prediction (Knotty)
 
-Predict structures that include pseudoknots, the crossing base pairs that ordinary MFE folding can't represent, using the bundled [Knotty](https://github.com/HosnaJabbari/Knotty) engine and its DP09 energy model. You get, per sequence, whether a pseudoknot is present, the predicted structure, and the free energy. From Jabbari et al. (2018), *Bioinformatics* 34(22):3849-3856. Same binary caveat as RNArobo: macOS is bundled, other platforms need `knotty` on PATH.
+Predict structures that include pseudoknots, the crossing base pairs that ordinary MFE folding can't represent, using the bundled [Knotty](https://github.com/HosnaJabbari/Knotty) engine and its DP09 energy model. You get, per sequence, whether a pseudoknot is present, the predicted structure, and the free energy. From Jabbari et al. (2018), *Bioinformatics* 34(22):3849-3856. Same binary caveat as RNArobo: macOS is bundled; on Linux, build it into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
+
+### Structure deck (RNAfold Deck)
+
+Turn the hairpins of one or more quality tiers into a PowerPoint. For each hairpin it folds the full-length sequence, the hairpin alone, or both, at one to five temperatures, and draws the MFE structure the way the RNAfold webserver does (naview layout, nucleotides colored by base-pair probability), with the sequence, MFE and dot-bracket beside it. Folding and drawing are local, with ViennaRNA (`RNAfold -p -d2 --noLP`, the webserver's defaults), so no internet connection or browser is needed. Every slide is re-read and checked before the deck is saved, and each fold is cross-checked against the RSAS sheet. See [RNAfold Deck](docs/features/rnafold-deck.md).
 
 ### Output and export
 
@@ -88,35 +92,58 @@ Predict structures that include pseudoknots, the crossing base pairs that ordina
 
 ### The interface
 
-A CustomTkinter desktop UI with a System / Light / Dark switch in the header (it follows your OS theme by default). The sidebar carries seven pages: Analyze, Results, Settings, Sequence Extractor, Synthetic Pool, RNArobo Search, and Pseudoknot Finder. Drag and drop files onto the window, drive it from the keyboard (Cmd/Ctrl+O to open, +R to run, +E to export), and spread large runs across multiple CPU cores. Progress shows up in the log with toast notifications.
+A CustomTkinter desktop UI with a System / Light / Dark switch in the header (it follows your OS theme by default). The sidebar carries nine pages: Analyze, Results, Settings, Sequence Extractor, Synthetic Pool, RNArobo Search, Pseudoknot Finder, RNAfold Deck, and About (version, how to cite, contacts). The Results page has its own Export button. Drag and drop files onto the window, drive it from the keyboard (Cmd/Ctrl+O to open, +R to run, +E to export), and spread large runs across multiple CPU cores. Progress shows up in the log with toast notifications.
 
 ---
 
 ## Quick start
 
-### From source
-
-ViennaRNA is the one dependency pip can't install, and the app won't start without it, so install it first.
-
 ```bash
-# 1. Install ViennaRNA (it does the folding; pip can't install it)
-brew install viennarna            # macOS
-# sudo apt-get install viennarna  # Ubuntu/Debian
-
-# 2. Clone and install the Python deps
-git clone https://github.com/RoyCyber1/RSAS.git
-cd RNAThermoFinder
-pip install -r requirements.txt
-
-# 3. Run it
-python main.py
+git clone https://github.com/<owner>/RSAS.git && cd RSAS
+conda env create -f environment.yml        # Windows: environment-windows.yml
+conda activate rsas
+python main.py                             # desktop application
+python -m RnaThermofinder analyze Examples/sample_dataset.fasta   # or the command line
 ```
 
-### Pre-built app
+Conda, Docker and native installation on Windows, macOS and Linux are covered step by step in **[INSTALL.md](INSTALL.md)**.
 
-When a release has a packaged build attached, you can download `RSAS.app` (macOS) or `RSAS.exe` (Windows) from [Releases](https://github.com/RoyCyber1/RSAS/releases) and run it with no Python or ViennaRNA setup. On macOS the app isn't notarized, so the first time, right-click it, choose **Open**, then **Open** again. If the latest release is source-only, use the from-source steps above.
+### Optional: RNArobo and Knotty
 
-If ViennaRNA gives you trouble (it's the usual culprit), the [installation guide](docs/installation.md) has a whole troubleshooting section.
+Only the RNArobo Search and Pseudoknot Finder pages need these external programs; everything else works without them. Both are installed **inside your RSAS folder** (`bin/<platform>/`), so no administrator rights are needed. On macOS they are already bundled in `bin/macos/` (run `xattr -dr com.apple.quarantine bin/macos` once; Apple Silicon also needs Rosetta 2). On Linux and WSL2, from your RSAS folder:
+
+```bash
+# RNArobo 2.1.0: ready-made Linux executable from its authors (Comenius University in Bratislava)
+mkdir -p bin/linux
+curl -L -o bin/linux/rnarobo https://compbio.fmph.uniba.sk/rnarobo/rnarobo-2.1.0-linux64
+chmod +x bin/linux/rnarobo
+
+# Knotty: build from source (needs a C++11 compiler and CMake >= 3.1, e.g. conda install -c conda-forge cmake)
+RSAS="$PWD"
+mkdir -p ~/tools && cd ~/tools
+curl -L -o Knotty-master.zip https://github.com/HosnaJabbari/Knotty/archive/master.zip
+unzip -q Knotty-master.zip && cd Knotty-master
+cmake -H. -Bbuild && cmake --build build
+cp "$(find . -maxdepth 2 -type f -name knotty -perm -u+x | head -n 1)" "$RSAS/bin/linux/"
+cp -R simfold "$RSAS/bin/linux/"            # Knotty's energy parameters, next to the executable
+cd "$RSAS"
+```
+
+Building from source on macOS, Windows (WSL2), Docker and how to check the engines: [INSTALL.md, section 8](INSTALL.md#8-optional-engines-rnarobo-and-knotty).
+
+### macOS: "RSAS is damaged and can't be opened"
+
+RSAS is not notarized by Apple, so macOS may block the downloaded **RSAS.app**, or the bundled `rnarobo` / `knotty` programs, with a misleading *"damaged"* or *"cannot be verified"* message. Nothing is damaged: macOS quarantines files downloaded from the internet. To open RSAS:
+
+1. **Recommended:** click **Cancel**, open **System Settings → Privacy & Security**, scroll to **Security**, click **Open Anyway** and enter your password.
+2. If **Open Anyway** is not offered, remove the quarantine flag in Terminal, then repeat step 1 if needed:
+
+   ```bash
+   sudo xattr -cr /Applications/RSAS.app            # the packaged app
+   xattr -dr com.apple.quarantine bin/macos         # RNArobo and Knotty, from your RSAS folder
+   ```
+
+If Terminal says *Operation not permitted*, give it **Full Disk Access** (System Settings → Privacy & Security) and restart it. Further options (temporarily disabling Gatekeeper, ad-hoc code signing): [INSTALL.md, section 7.4](INSTALL.md#74-macos-security-warnings-gatekeeper).
 
 ---
 
@@ -149,13 +176,17 @@ What you get depends on what you've enabled, but the categories are:
 ## Project structure
 
 ```
-RNAThermoFinder/
+RSAS/
 ├── main.py                    # entry point
 ├── settings_manager.py        # config persistence + output column definitions
 ├── setup.py                   # package setup
 ├── build_app.py               # PyInstaller build script
 ├── requirements.txt
 ├── RSAS.spec                  # PyInstaller spec
+├── INSTALL.md                 # installation guide (Conda, Docker, Windows, macOS, Linux)
+├── environment.yml            # Conda environment, Linux/macOS
+├── environment-windows.yml    # Conda environment, Windows
+├── Dockerfile                 # container image (CLI + optional X11 GUI)
 ├── bin/                       # bundled engines (rnarobo, knotty) per platform
 ├── Examples/                  # sample FASTA inputs
 ├── RnaThermofinder/
@@ -174,6 +205,11 @@ RNAThermoFinder/
 │   │   ├── knotty_dialog.py          # pseudoknot finder UI
 │   │   ├── upstream_extractor_dialog.py
 │   │   └── sequence_settings_dialog.py
+│   ├── deck/                         # RNAfold Deck: tier hairpins -> structures -> PowerPoint
+│   │   ├── local_fold.py             # ViennaRNA fold + webserver-style drawing (SVG/PNG)
+│   │   ├── engine.py                 # select, trace, fold, build + verify
+│   │   ├── panel.py                  # sidebar page (also a standalone window)
+│   │   └── cli.py                    # python -m RnaThermofinder.deck run ...
 │   └── utils/
 │       ├── analysis_helpers.py       # CSV/Excel output builders
 │       ├── motif_finder.py           # IUPAC motif search + sequestering
@@ -205,13 +241,13 @@ That gives you `dist/RSAS.app` (macOS), `dist/RSAS.exe` (Windows), or `dist/RSAS
 pyinstaller RSAS.spec
 ```
 
-The build takes a few minutes and bundles Python, the dependencies, and the ViennaRNA bindings, so the result runs on a machine with none of that installed.
+The build takes a few minutes and bundles Python, the dependencies, and the ViennaRNA bindings, so the result runs on a machine with none of that installed. The app is not notarized by Apple; see [macOS: "RSAS is damaged and can't be opened"](#macos-rsas-is-damaged-and-cant-be-opened) for opening it on another Mac.
 
 ---
 
 ## Documentation
 
-- **[Installation guide](docs/installation.md)** covers system requirements, getting ViennaRNA working, the Python dependencies, verification, and the troubleshooting you'll probably need.
+- **[Installation guide](INSTALL.md)** covers Conda, Docker and native installation on Windows, macOS and Linux, the optional RNArobo/Knotty engines, verification, and troubleshooting.
 - **[Usage guide](docs/usage.md)** walks through the GUI, loading and running, the output formats, the scripting API, and a pile of practical tips.
 - **[Features and tools, in depth](docs/features/README.md)** is one detailed page per feature and tool: every option, what it produces, a worked example, and the gotchas.
 - **[How it works](docs/methods.md)** is the methods document: the folding model, the RBS and hairpin algorithms, how the quality score is computed, what the thermometer signal is, and where the limits are.

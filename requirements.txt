@@ -1,14 +1,11 @@
-# Runtime
-openpyxl>=3.1.0
+# RSAS runtime dependencies (pip). Conda users: see environment.yml / environment-windows.yml.
+ViennaRNA>=2.6          # folding engine; official wheels for Linux, macOS (Intel/Apple Silicon) and Windows
 numpy>=1.20.0
-customtkinter>=5.2.0
+openpyxl>=3.1.0
 biopython>=1.80
-Pillow>=9.0.0
-# Build (only needed for packaging)
-setuptools>=68.0
-pyinstaller>=6.0
-
-# ViennaRNA must be installed via system package manager:
-#   macOS:  brew install viennarna
-#   Ubuntu: sudo apt-get install viennarna
-#   Fedora: sudo dnf install viennarna
+customtkinter>=5.2,<6   # RSAS targets the 5.x series
+# RNAfold Deck (local structure drawings -> PowerPoint)
+python-pptx>=1.0
+matplotlib>=3.7
+pillow>=10
+lxml>=5

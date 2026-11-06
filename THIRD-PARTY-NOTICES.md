@@ -18,7 +18,9 @@ packaged app's DMG.
   GPL-3.0 permits commercial and non-commercial use, modification, and
   redistribution, provided the license and copyright notices are preserved and
   the corresponding source remains available. RSAS redistributes it unmodified.
-- **Source:** https://github.com/rampasek/RNArobo
+- **Source:** https://github.com/rampasek/RNArobo; release archives and the
+  Linux executable: https://compbio.fmph.uniba.sk/software.php (Computational
+  Biology, Comenius University in Bratislava)
 - **Use in RSAS:** structural motif search (the RNArobo Search page).
 - **Citation:** Rampášek, L., Jimenez, R.M., Lupták, A., Vinař, T., Brejová, B.
   (2016). RNA motif search with data-driven element ordering.

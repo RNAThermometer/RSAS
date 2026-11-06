@@ -1,0 +1,25 @@
+# Conda environment for RSAS on Linux and macOS (Intel and Apple Silicon).
+# Windows: use environment-windows.yml (bioconda has no Windows build of ViennaRNA).
+name: rsas
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.11
+  - viennarna>=2.6      # folding engine (Python module "RNA")
+  - numpy>=1.20
+  - openpyxl>=3.1
+  - biopython>=1.80
+  - tk                  # Tkinter backend for the GUI
+  - customtkinter>=5.2,<6   # RSAS targets the 5.x series
+  # RNAfold Deck (local structure drawings -> PowerPoint)
+  - python-pptx>=1.0
+  - matplotlib-base>=3.7
+  - pillow>=10
+  - lxml>=5
+  - pytest
+  - pip
+  # Optional: only needed to build the standalone app
+  - setuptools>=68
+  - pyinstaller>=6.0

@@ -18,3 +18,4 @@ One page per feature and tool, each grounded in the code: what it does, every op
 - **[Sequence Extractor](sequence-extractor.md)**: pull upstream/downstream regions from local files or NCBI.
 - **[RNArobo Search](rnarobo-search.md)**: structural motif search (helices and loops).
 - **[Pseudoknot Finder](pseudoknot-finder.md)**: pseudoknot prediction with Knotty.
+- **[RNAfold Deck](rnafold-deck.md)**: tier hairpins → full-length and hairpin structures at 1–5 temperatures → verified PowerPoint, folded and drawn locally.

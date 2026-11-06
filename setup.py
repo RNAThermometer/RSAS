@@ -9,15 +9,15 @@ except FileNotFoundError:
 try:
     with open("requirements.txt", "r", encoding="utf-8") as fh:
         requirements = [
-            line.strip() for line in fh
-            if line.strip() and not line.startswith("#")
+            line.split("#", 1)[0].strip() for line in fh
+            if line.split("#", 1)[0].strip()
         ]
 except FileNotFoundError:
     requirements = []
 
 setup(
     name="RSAS",
-    version="3.2.0",
+    version="4.0.0",
     author="Roy Vaknin",
     author_email="roycyber13@gmail.com",
     description="RSAS: RNA Structure Analysis Suite for identifying and analyzing RNA thermometers and regulatory structures",
@@ -32,15 +32,18 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=requirements,
     entry_points={
         "console_scripts": [
+            "rsas-cli=RnaThermofinder.__main__:main",
+        ],
+        "gui_scripts": [
             "rsas=main:main",
         ],
     },

@@ -17,11 +17,11 @@ import threading
 import customtkinter as ctk
 
 try:
-    from settings_manager import default_output_dir
+    from settings_manager import input_stem, new_run_dir, remove_if_empty
 except ImportError:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from settings_manager import default_output_dir
+    from settings_manager import input_stem, new_run_dir, remove_if_empty
 
 from RnaThermofinder.utils.rnarobo_wrapper import (
     RNAROBO_PRESETS,
@@ -283,7 +283,8 @@ class RNAroboDialog:
             self.run_btn.configure(state="normal")
         else:
             self.status_label.configure(
-                text=f"\u2717 RNArobo not found — place binary in bin/<platform>/",
+                text=("\u2717 RNArobo not found. Put the rnarobo executable in bin/<platform>/ of your "
+                      "RSAS folder (no administrator rights needed); see INSTALL.md, section 8."),
                 text_color="#e74c3c")
             self.run_btn.configure(state="disabled")
 
@@ -642,6 +643,8 @@ class RNAroboDialog:
         self._clear_log()
         self._log("Starting RNArobo search...\n")
         self._results = None
+        self._run_input = seq_file                      # names the exported files
+        self._run_descriptor = self.preview_text.get("1.0", tk.END).strip()
 
         # Capture all tkinter variable values here in the main thread.
         # BooleanVar.get() is not thread-safe — reading it inside the
@@ -725,16 +728,21 @@ class RNAroboDialog:
                                 parent=self.dialog)
             return
 
+        # each search is saved in its own folder, every file named after the input FASTA:
+        # ~/RSAS/<input>_rnarobo_<timestamp>/<input>_rnarobo_results.tsv (+ _descriptor.des)
+        stem = input_stem(getattr(self, "_run_input", "") or self.input_var.get())
+        run_dir = new_run_dir(stem, "rnarobo")
         output_file = filedialog.asksaveasfilename(
             parent=self.dialog,
             title="Save results as...",
-            initialdir=str(default_output_dir()),
-            initialfile="rnarobo_results.tsv",
+            initialdir=str(run_dir),
+            initialfile=f"{stem}_rnarobo_results.tsv",
             filetypes=[("TSV files", "*.tsv"), ("Text files", "*.txt"),
                        ("All files", "*.*")],
             defaultextension=".tsv",
         )
         if not output_file:
+            remove_if_empty(run_dir)
             return
 
         def _tsv(val: str) -> str:
@@ -748,6 +756,12 @@ class RNAroboDialog:
                 fh.write(f"{_tsv(m.seq_name)}\t{m.seq_from}\t{m.seq_to}\t"
                          f"{strand}\t{_tsv(m.description)}\t{_tsv(m.elements)}\n")
 
+        out_dir = Path(output_file).parent
+        descriptor = getattr(self, "_run_descriptor", "")
+        if descriptor:
+            (out_dir / f"{stem}_rnarobo_descriptor.des").write_text(descriptor + "\n", encoding="utf-8")
+        if out_dir.resolve() != run_dir.resolve():
+            remove_if_empty(run_dir)                      # the user picked another folder
         self._log(f"\nResults exported to: {output_file}")
         messagebox.showinfo("Export Complete",
                             f"Results saved to:\n{output_file}",

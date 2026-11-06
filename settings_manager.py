@@ -41,6 +41,51 @@ def default_output_dir() -> Path:
         return get_user_data_dir()
 
 
+_INPUT_SUFFIXES = (".gz", ".fasta", ".fas", ".fa", ".fna", ".ffn", ".frn", ".fsa", ".seq",
+                   ".txt", ".csv", ".tsv", ".gb", ".gbk", ".genbank", ".gff", ".gff3")
+
+
+def input_stem(path, fallback: str = "rsas") -> str:
+    """File-name prefix for every output of an analysis: the input file's name without its extension(s),
+    kept as typed except characters no file system allows. ``/data/Rose like_v2.fasta.gz`` -> ``Rose like_v2``."""
+    import re
+    name = Path(str(path)).name if path else ""
+    low = name.lower()
+    changed = True
+    while changed and name:
+        changed = False
+        for suf in _INPUT_SUFFIXES:
+            if low.endswith(suf) and len(name) > len(suf):
+                name, low, changed = name[:-len(suf)], low[:-len(suf)], True
+                break
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", name).strip(" ._")[:100]
+    return name or fallback
+
+
+def new_run_dir(stem: str, tool: str = "", base=None) -> Path:
+    """A new, empty folder for one analysis run: ``~/RSAS/<stem>[_<tool>]_<YYYYmmdd_HHMMSS>``.
+    Every run gets its own folder, so results are never overwritten."""
+    from datetime import datetime
+    base = Path(base) if base else default_output_dir()
+    label = f"{stem}_{tool}" if tool else stem
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run = base / f"{label}_{stamp}"
+    n = 2
+    while run.exists():
+        run = base / f"{label}_{stamp}_{n}"
+        n += 1
+    run.mkdir(parents=True)
+    return run
+
+
+def remove_if_empty(folder) -> None:
+    """Undo new_run_dir() when the user cancels before anything was written."""
+    try:
+        Path(folder).rmdir()
+    except OSError:
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Default temperatures — single source of truth
 # ---------------------------------------------------------------------------

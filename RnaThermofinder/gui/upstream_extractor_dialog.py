@@ -11,11 +11,11 @@ import threading
 import customtkinter as ctk
 
 try:
-    from settings_manager import default_output_dir
+    from settings_manager import default_output_dir, input_stem
 except ImportError:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from settings_manager import default_output_dir
+    from settings_manager import default_output_dir, input_stem
 
 
 class SequenceExtractorDialog:
@@ -335,10 +335,13 @@ class SequenceExtractorDialog:
             setattr(self, f"{file_type}_file", fn)
 
     def _browse_save_file(self, file_type, filetypes):
+        genome = getattr(self, "fasta_var", None)
+        genome = genome.get().strip() if genome is not None else ""
+        prefix = f"{input_stem(genome)}_" if genome else ""   # named after the input genome FASTA
         fn = filedialog.asksaveasfilename(
             title="Save extracted sequences as...",
             initialdir=str(default_output_dir()),
-            initialfile="extracted_sequences.fasta",
+            initialfile=f"{prefix}extracted_sequences.fasta",
             filetypes=filetypes, defaultextension=".fasta")
         if fn:
             getattr(self, f"{file_type}_var").set(fn)
@@ -405,7 +408,7 @@ class SequenceExtractorDialog:
             except Exception as e:
                 self._log(f"Error: {e}")
                 self._safe_after(lambda: self.fetch_status_var.set("Fetch failed"))
-                self._safe_after(lambda: messagebox.showerror("Error", str(e), parent=self.dialog))
+                self._safe_after(lambda msg=str(e): messagebox.showerror("Error", msg, parent=self.dialog))
             finally:
                 self._safe_after(lambda: self.fetch_btn.configure(state="normal"))
 
@@ -524,7 +527,7 @@ class SequenceExtractorDialog:
                     parent=self.dialog))
             except Exception as e:
                 self._log(f"Error: {e}")
-                self._safe_after(lambda: messagebox.showerror("Error", str(e), parent=self.dialog))
+                self._safe_after(lambda msg=str(e): messagebox.showerror("Error", msg, parent=self.dialog))
             finally:
                 self._safe_after(lambda: self.run_btn.configure(state="normal"))
 

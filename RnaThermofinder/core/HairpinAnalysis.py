@@ -1781,7 +1781,8 @@ def calculate_results_final(
         output_dir: Path,
         settings: Dict[str, int],
         progress_callback: Optional[Callable[[str], None]] = None,
-        csv_settings_manager = None
+        csv_settings_manager = None,
+        file_prefix: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Analyze RNA sequences for thermometer properties.
@@ -1793,6 +1794,8 @@ def calculate_results_final(
         settings: Analysis filter settings (MFE ranges, composition ranges, etc.)
         progress_callback: Optional function to call with progress messages
         csv_settings_manager: Settings manager for output column configuration
+        file_prefix: Optional name (normally the input file's) that starts every output file name,
+            e.g. "Rose_like" -> Rose_like_rna_results.csv / .xlsx
 
     Returns:
         List of result dictionaries
@@ -1816,8 +1819,11 @@ def calculate_results_final(
         hrs, mins = divmod(mins, 60)
         return f"{int(hrs)}h {int(mins)}m {secs:.0f}s"
 
-    structures_dir = output_dir / "structures"
-    structures_dir.mkdir(parents=True, exist_ok=True)
+    # file_prefix (the input file's name) starts every output file name: <prefix>_rna_results.csv/.xlsx
+    out_prefix = f"{file_prefix}_" if file_prefix else ""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    if not file_prefix:  # legacy layout kept for scripts that call without a prefix
+        (output_dir / "structures").mkdir(parents=True, exist_ok=True)
 
     total = len(sequences)
 
@@ -1982,7 +1988,7 @@ def calculate_results_final(
     log(f"\n{'=' * 60}")
     log(f"Saving results to CSV...")
 
-    output_file = output_dir / "rna_results.csv"
+    output_file = output_dir / f"{out_prefix}rna_results.csv"
 
     csv_settings = csv_settings_manager
     try:
@@ -2025,7 +2031,7 @@ def calculate_results_final(
     # Save Excel with two tabs
     try:
         from RnaThermofinder.utils.analysis_helpers import write_excel_with_tabs
-        excel_file = output_dir / "rna_results.xlsx"
+        excel_file = output_dir / f"{out_prefix}rna_results.xlsx"
         write_excel_with_tabs(results, excel_file, csv_settings, temps=temps)
         log(f"Excel saved to: {excel_file.name} (Full Sequence + Hairpin Analysis tabs)")
     except ImportError:

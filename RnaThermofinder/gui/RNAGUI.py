@@ -18,7 +18,8 @@ import customtkinter as ctk
 
 # ── project imports ──────────────────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from settings_manager import SettingsManager, get_user_data_dir, default_output_dir
+from settings_manager import (SettingsManager, get_user_data_dir, default_output_dir, input_stem,
+                              new_run_dir)
 from RnaThermofinder.core import FastaParse, HairpinAnalysis
 
 # Dialog imports (CTk-based)
@@ -129,7 +130,7 @@ class RSASApp:
 
     def __init__(self, root: ctk.CTk):
         self.root = root
-        self.root.title("RSAS: RNA Structure Analysis Suite v3.2.0")
+        self.root.title("RSAS: RNA Structure Analysis Suite v4.0.0")
         self.root.geometry("1200x780")
         self.root.minsize(900, 600)
 
@@ -154,6 +155,10 @@ class RSASApp:
         # a frozen PyInstaller / .app bundle (which is read-only on macOS).
         self.output_dir = get_user_data_dir() / "Data" / "Outputs"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        # Each analysis writes into its own folder, ~/RSAS/<input>_<YYYYmmdd_HHMMSS>/, and every file in it
+        # starts with the input file's name (see settings_manager.new_run_dir / input_stem)
+        self.last_run_dir = None
+        self.last_run_stem = None
 
         # Recent files
         self._recent_files: list[str] = self._load_recent_files()
@@ -164,6 +169,7 @@ class RSASApp:
         # ── build UI ─────────────────────────────────────────────────────
         self._build_layout()
         self._bind_shortcuts()
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     # ──────────────────────────────────────────────────────────────────────
     # Layout
@@ -197,7 +203,7 @@ class RSASApp:
         ).pack(side=tk.LEFT, padx=(8, 0))
 
         ctk.CTkLabel(
-            header, text="v3.2.0",
+            header, text="v4.0.0",
             font=ctk.CTkFont(size=11),
             text_color=MUTED,
         ).pack(side=tk.LEFT, padx=(8, 0))
@@ -232,6 +238,8 @@ class RSASApp:
             ("pool",     "Synthetic Pool",     "\u2261"),
             ("rnarobo",  "RNArobo Search",     "\u2316"),
             ("knotty",  "Pseudoknot Finder",  "\u2297"),
+            ("deck",     "RNAfold Deck",       "\u25ce"),
+            ("about",    "About",              "\u24d8"),
         ]
         ctk.CTkLabel(self._sidebar, text="NAVIGATION",
                      font=ctk.CTkFont(size=10, weight="bold"),
@@ -277,6 +285,13 @@ class RSASApp:
         self._build_pool_page()
         self._build_rnarobo_page()
         self._build_knotty_page()
+        self._build_deck_page()
+        self._build_about_page()
+        if sys.platform == "darwin":   # RSAS > About RSAS in the macOS menu bar opens the same page
+            try:
+                self.root.createcommand("tkAboutDialog", lambda: self._show_page("about"))
+            except tk.TclError:
+                pass
 
         # Show default page
         self._show_page("analyze")
@@ -444,11 +459,30 @@ class RSASApp:
     def _build_results_page(self):
         page = ctk.CTkFrame(self._content, fg_color="transparent")
         self._pages["results"] = page
-        page.grid_rowconfigure(0, weight=1)
+        page.grid_rowconfigure(1, weight=1)
         page.grid_columnconfigure(0, weight=1)
 
+        # Toolbar: Export button (same action as on the Analyze page)
+        results_toolbar = ctk.CTkFrame(page, fg_color="transparent")
+        results_toolbar.grid(row=0, column=0, sticky="ew", padx=20, pady=(16, 0))
+        self.results_export_btn = ctk.CTkButton(
+            results_toolbar, text="Export", width=100, height=40,
+            fg_color=SUCCESS, hover_color=SUCCESS_HOVER,
+            command=self.export_results, state=tk.DISABLED,
+        )
+        self.results_export_btn.pack(side=tk.RIGHT)
+        self.results_folder_btn = ctk.CTkButton(
+            results_toolbar, text="Open Results Folder", width=160, height=40,
+            fg_color=ACCENT, hover_color=ACCENT_HOVER,
+            command=self._open_last_run_folder, state=tk.DISABLED,
+        )
+        self.results_folder_btn.pack(side=tk.RIGHT, padx=(0, 8))
+        self._results_folder_var = tk.StringVar(value="")
+        ctk.CTkLabel(results_toolbar, textvariable=self._results_folder_var, text_color=MUTED,
+                     anchor="w").pack(side=tk.LEFT, fill="x", expand=True)
+
         self._results_tabview = ctk.CTkTabview(page, corner_radius=10)
-        self._results_tabview.grid(row=0, column=0, sticky="nsew", padx=20, pady=16)
+        self._results_tabview.grid(row=1, column=0, sticky="nsew", padx=20, pady=(8, 16))
 
         # Tab 1: Summary table
         tab_table = self._results_tabview.add("Results Table")
@@ -618,6 +652,94 @@ class RSASApp:
             font=ctk.CTkFont(size=13, weight="bold"),
             command=self._open_knotty_dialog,
         ).grid(row=2, column=0, sticky="w", padx=24, pady=8)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Page: About
+    # ──────────────────────────────────────────────────────────────────────
+    ABOUT_CONTACTS = [
+        ("Michael M. Abdelsayed", "michael.abdelsayed@csun.edu"),
+        ("Luiz Passalacqua", "lmoreirapassalac@ufl.edu"),
+    ]
+    ABOUT_CITATION = "TBD"
+
+    def _build_about_page(self):
+        import webbrowser
+        from RnaThermofinder import __version__
+
+        page = ctk.CTkFrame(self._content, fg_color="transparent")
+        self._pages["about"] = page
+        page.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(page, text="About",
+                     font=ctk.CTkFont(size=18, weight="bold"),
+                     ).grid(row=0, column=0, sticky="w", padx=24, pady=(20, 12))
+
+        card = ctk.CTkFrame(page, corner_radius=10)
+        card.grid(row=1, column=0, sticky="ew", padx=20, pady=8)
+        card.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(card, text=f"RSAS: RNA Structure and Analysis Suite v{__version__}",
+                     font=ctk.CTkFont(size=15, weight="bold"), anchor="w",
+                     ).grid(row=0, column=0, sticky="w", padx=20, pady=(18, 12))
+
+        ctk.CTkLabel(card, text="To cite this article, use:",
+                     font=ctk.CTkFont(size=13, weight="bold"), anchor="w",
+                     ).grid(row=1, column=0, sticky="w", padx=20)
+        citation = ctk.CTkLabel(card, text=self.ABOUT_CITATION, font=ctk.CTkFont(size=13),
+                                anchor="w", justify="left", wraplength=760)
+        citation.grid(row=2, column=0, sticky="w", padx=20, pady=(2, 14))
+
+        ctk.CTkLabel(card, text="Contact:",
+                     font=ctk.CTkFont(size=13, weight="bold"), anchor="w",
+                     ).grid(row=3, column=0, sticky="w", padx=20)
+        for i, (name, email) in enumerate(self.ABOUT_CONTACTS):
+            row = ctk.CTkFrame(card, fg_color="transparent")
+            row.grid(row=4 + i, column=0, sticky="w", padx=20, pady=2)
+            ctk.CTkLabel(row, text=f"{name}:", font=ctk.CTkFont(size=13)).pack(side=tk.LEFT)
+            link = ctk.CTkLabel(row, text=email, font=ctk.CTkFont(size=13, underline=True),
+                                text_color=ACCENT, cursor="hand2")
+            link.pack(side=tk.LEFT, padx=(6, 0))
+            link.bind("<Button-1>", lambda _e, a=email: webbrowser.open(f"mailto:{a}"))
+        ctk.CTkFrame(card, fg_color="transparent", height=14).grid(
+            row=4 + len(self.ABOUT_CONTACTS), column=0)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Page: RNAfold Deck (tier hairpins -> local ViennaRNA structures -> PowerPoint)
+    # ──────────────────────────────────────────────────────────────────────
+    def _build_deck_page(self):
+        page = ctk.CTkScrollableFrame(self._content, fg_color="transparent")
+        self._pages["deck"] = page
+        page.grid_columnconfigure(0, weight=1)
+        self._deck_panel = None
+        try:
+            from RnaThermofinder.deck.panel import DeckPanel
+        except ImportError as e:  # RSAS keeps working without the deck's extra packages
+            ctk.CTkLabel(
+                page, justify="left", text_color=MUTED, wraplength=700,
+                text=(f"RNAfold Deck needs '{e.name}', which is not installed in this Python.\n"
+                      "Install it in the rsas environment, e.g.:\n"
+                      "  conda install -c conda-forge python-pptx matplotlib-base pillow lxml\n"
+                      "then restart RSAS."),
+            ).grid(row=0, column=0, sticky="w", padx=24, pady=24)
+            return
+        self._deck_panel = DeckPanel(page, latest_results=self._latest_results_xlsx)
+        self._deck_panel.grid(row=0, column=0, sticky="nsew")
+
+    def _latest_results_xlsx(self):
+        """The Excel workbook of the last analysis (this session, else the newest run folder in ~/RSAS)."""
+        path = self._last_run_file("xlsx")
+        if path:
+            return str(path)
+        try:
+            found = sorted(default_output_dir().glob("*/*_rna_results.xlsx"), key=lambda p: p.stat().st_mtime)
+        except OSError:
+            found = []
+        return str(found[-1]) if found else None
+
+    def _on_close(self):
+        if self._deck_panel is not None and not self._deck_panel.confirm_close():
+            return
+        self.root.destroy()
 
     # ──────────────────────────────────────────────────────────────────────
     # Drag-and-drop (tkdnd fallback: OS file drop via tkinter)
@@ -827,7 +949,8 @@ class RSASApp:
 
     def _open_knotty_dialog(self):
         seqs = [{"name": s[0], "sequence": s[1]} for s in self.sequences] if self.sequences else []
-        dialog = KnottyDialog(self.root, sequences=seqs)
+        dialog = KnottyDialog(self.root, sequences=seqs,
+                              input_name=input_stem(self.file_path_var.get()) if seqs else None)
         dialog.show()
 
     # ──────────────────────────────────────────────────────────────────────
@@ -894,6 +1017,8 @@ class RSASApp:
         self._progress_label_var.set("")
         self._file_badge_var.set("")
         self.export_btn.configure(state=tk.DISABLED)
+        self.results_export_btn.configure(state=tk.DISABLED)
+        self.results_folder_btn.configure(state=tk.DISABLED)
 
     def run_analysis(self):
         if getattr(self, '_analysis_running', False):
@@ -922,6 +1047,10 @@ class RSASApp:
         thread.start()
 
     def _perform_analysis(self, file_path: str):
+        stem = input_stem(file_path)
+        run_dir = None
+        run_log: list[str] = []
+        started = datetime.now()
         try:
             self.root.after(0, lambda: self.status_var.set("Loading sequences..."))
 
@@ -946,9 +1075,12 @@ class RSASApp:
             self._analysis_count = 0
 
             original_log = self.log
+            run_dir = new_run_dir(stem)
+            original_log(f"Results folder: {run_dir}")
 
             def progress_log(message: str):
                 original_log(message)
+                run_log.append(message)
                 updated = False
                 # Sequential: count completed sequences
                 if message.lstrip().startswith("Done ") or message.lstrip().startswith("Skipped "):
@@ -989,11 +1121,16 @@ class RSASApp:
                 analysis_settings["_rbs_override"] = self._rbs_run_override
             self.results = HairpinAnalysis.calculate_results_final(
                 self.sequences,
-                self.output_dir,
+                run_dir,
                 analysis_settings,
                 progress_log,
                 self.csv_settings_manager,
+                file_prefix=stem,
             )
+            self.last_run_dir, self.last_run_stem = run_dir, stem
+            self._write_run_record(run_dir, stem, file_path, started, run_log, analysis_settings, ok=True)
+            self.root.after(0, lambda: self._results_folder_var.set(f"{run_dir.name}  ({run_dir.parent})"))
+            original_log(f"All outputs of this run are in: {run_dir}")
 
             # Populate results tabs
             self.root.after(0, lambda: self._populate_results_tabs())
@@ -1012,6 +1149,8 @@ class RSASApp:
                 ),
             )
             self.root.after(0, lambda: self.export_btn.configure(state=tk.NORMAL))
+            self.root.after(0, lambda: self.results_export_btn.configure(state=tk.NORMAL))
+            self.root.after(0, lambda: self.results_folder_btn.configure(state=tk.NORMAL))
             self.root.after(
                 0,
                 lambda: self._toast(
@@ -1029,6 +1168,9 @@ class RSASApp:
             self.log(f"\nERROR: {err_msg}")
             self.log(error_details)
             self.root.after(0, lambda: self._toast(f"Error: {err_msg}", "error", 6000))
+            if run_dir is not None:
+                run_log += [f"ERROR: {err_msg}", error_details]
+                self._write_run_record(run_dir, stem, file_path, started, run_log, {}, ok=False)
 
         finally:
             self._analysis_running = False
@@ -1115,6 +1257,45 @@ class RSASApp:
     # ──────────────────────────────────────────────────────────────────────
     # Export
     # ──────────────────────────────────────────────────────────────────────
+    def _write_run_record(self, run_dir, stem, input_path, started, run_log, analysis_settings, ok=True):
+        """<stem>_run_log.txt and <stem>_run_info.json next to the results, for traceability."""
+        try:
+            (run_dir / f"{stem}_run_log.txt").write_text("\n".join(run_log) + "\n", encoding="utf-8")
+            from RnaThermofinder import __version__ as rsas_version
+            try:
+                import RNA
+                vienna = RNA.__version__
+            except Exception:  # noqa: BLE001
+                vienna = "?"
+            info = {
+                "rsas_version": rsas_version, "viennarna_version": vienna,
+                "input_file": str(input_path), "input_name": stem,
+                "started": started.isoformat(timespec="seconds"),
+                "finished": datetime.now().isoformat(timespec="seconds"),
+                "status": "ok" if ok else "error",
+                "sequences": len(self.sequences), "results": len(self.results) if ok else 0,
+                "folding_temperatures": self.csv_settings_manager.get_temperatures(),
+                "analysis_settings": {k: v for k, v in analysis_settings.items()
+                                      if isinstance(v, (str, int, float, bool, type(None)))},
+                "files": sorted(p.name for p in run_dir.iterdir()),
+            }
+            (run_dir / f"{stem}_run_info.json").write_text(json.dumps(info, indent=1), encoding="utf-8")
+        except Exception as e:  # noqa: BLE001 - the record must never break an analysis
+            self.log(f"Could not write the run record: {e}")
+
+    def _last_run_file(self, kind: str):
+        """The last run's <stem>_rna_results.<kind>, or None."""
+        if not (self.last_run_dir and self.last_run_stem):
+            return None
+        path = self.last_run_dir / f"{self.last_run_stem}_rna_results.{kind}"
+        return path if path.is_file() else None
+
+    def _open_last_run_folder(self):
+        if self.last_run_dir and Path(self.last_run_dir).is_dir():
+            self._open_folder(Path(self.last_run_dir))
+        else:
+            self._toast("Run an analysis first", "warning")
+
     def export_results(self):
         if not self.results:
             self._toast("Run analysis first", "warning")
@@ -1122,7 +1303,8 @@ class RSASApp:
 
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            default_filename = f"rsas_results_{timestamp}.xlsx"
+            stem = self.last_run_stem or "rsas"
+            default_filename = f"{stem}_rna_results_{timestamp}.xlsx"
 
             output_file = filedialog.asksaveasfilename(
                 parent=self.root,
@@ -1134,7 +1316,7 @@ class RSASApp:
                     ("All files", "*.*"),
                 ],
                 initialfile=default_filename,
-                initialdir=str(default_output_dir()),
+                initialdir=str(self.last_run_dir or default_output_dir()),
             )
             if not output_file:
                 return
@@ -1142,8 +1324,8 @@ class RSASApp:
             import shutil
 
             if output_file.endswith(".xlsx"):
-                source_xlsx = self.output_dir / "rna_results.xlsx"
-                if source_xlsx.exists():
+                source_xlsx = self._last_run_file("xlsx")
+                if source_xlsx:
                     shutil.copy2(source_xlsx, output_file)
                 else:
                     from RnaThermofinder.utils.analysis_helpers import (
@@ -1153,8 +1335,8 @@ class RSASApp:
                         self.results, output_file, self.csv_settings_manager
                     )
             else:
-                source_csv = self.output_dir / "rna_results.csv"
-                if source_csv.exists():
+                source_csv = self._last_run_file("csv")
+                if source_csv:
                     shutil.copy2(source_csv, output_file)
                 else:
                     self._toast("Results file not found", "error")
