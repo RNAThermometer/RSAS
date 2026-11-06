@@ -279,9 +279,11 @@ RSAS is MIT-licensed (see [LICENSE.md](LICENSE.md)) and is non-commercial academ
 
 ## Author
 
-Roy Vaknin
-- Email: roycyber13@gmail.com
-- GitHub: [RoyCyber1](https://github.com/RoyCyber1)
+Contact:
+Michael M. Abdelsayed: 
+- michael.abdelsayed@csun.edu 
+Luiz Passalacqua: 
+- lmoreirapassalac@ufl.edu
 
 ## Acknowledgments
 
