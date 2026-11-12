@@ -261,8 +261,9 @@ The build takes a few minutes and bundles Python, the dependencies, and the Vien
 If RSAS shows up in published work:
 
 ```
-Vaknin, R. (2025). RSAS: RNA Structure Analysis Suite v3.2.
-GitHub: https://github.com/RoyCyber1/RSAS
+Soon to be updated.
+RSAS: RNA Structure Analysis Suite v4.0.
+GitHub: [https://github.com/RNAThermometer/RSAS]
 ```
 
 The repository also ships a [`CITATION.cff`](CITATION.cff), so GitHub's "Cite this repository" button generates APA and BibTeX entries for you.
@@ -288,5 +289,3 @@ RSAS is MIT-licensed (see [LICENSE.md](LICENSE.md)) and is non-commercial academ
 - [ViennaRNA](https://www.tbi.univie.ac.at/RNA/) for the folding algorithms RSAS leans on.
 - [RNArobo](https://github.com/rampasek/RNArobo) for structural motif search.
 - [Knotty](https://github.com/HosnaJabbari/Knotty) (Jabbari et al. 2018) for pseudoknot prediction.
-- Dr. Abdelsayed for experimental validation data.
-- The SCREAM team for testing and feedback.
