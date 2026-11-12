@@ -43,6 +43,7 @@ Data/Inputs/*.txt
 !docs/**/*.png
 !docs/**/*.svg
 !Examples/**/*.png
+!tests/deck_webserver_fixtures/*.svg
 
 # Built applications (too large for git)
 *.zip
@@ -69,3 +70,7 @@ csv_output_settings.json
 # Test outputs
 test_output/
 temp/
+
+# Local engine downloads and builds (see INSTALL.md, section 8)
+bin/linux/Knotty-master/
+bin/linux/rnarobo

@@ -18,8 +18,8 @@ This guide covers every supported way to install **RSAS (RNA Structure Analysis 
 5. [Method A: Conda (recommended)](#5-method-a-conda-recommended)
 6. [Method B: Docker](#6-method-b-docker)
 7. [Method C: Native installation](#7-method-c-native-installation)
-    - [Windows](#71-windows)
-    - [macOS](#72-macos)
+    - [Windows](#71-windows) · [building the Windows executable](#building-the-windows-executable)
+    - [macOS](#72-macos) · [building the macOS application](#building-the-macos-application)
     - [Linux](#73-linux)
     - [macOS security warnings (Gatekeeper)](#74-macos-security-warnings-gatekeeper)
 8. [Optional engines: RNArobo and Knotty](#8-optional-engines-rnarobo-and-knotty)
@@ -290,6 +290,52 @@ python main.py
 
 **RNArobo and Knotty on Windows.** Windows builds of both engines are bundled in `bin\windows\` (`rnarobo.exe`, `knotty.exe` and Knotty's `simfold\` parameters), so every page works natively; see [§8.3](#83-windows).
 
+#### Building the Windows executable
+
+These steps produce `dist\RSAS.exe`, a single file that runs on 64-bit Windows (Intel/AMD) without Python. It already contains Python, ViennaRNA, `rnarobo.exe`, `knotty.exe` and Knotty's `simfold\` parameters. Build it on a Windows PC: PyInstaller cannot create a Windows executable on macOS or Linux, and Windows on ARM is not supported (no ViennaRNA build).
+
+**1. Install the tools (once).**
+- **Miniforge:** download *Miniforge3-Windows-x86_64.exe* from <https://conda-forge.org/download/> and install it with the default options.
+- **Git:** <https://git-scm.com/download/win>.
+
+**2. Open the *Miniforge Prompt*** (Start menu) **and download the project:**
+
+```bat
+cd %USERPROFILE%
+git clone https://github.com/RNAThermometer/RSAS.git
+cd RSAS
+```
+
+**3. Create the environment:**
+
+```bat
+conda env create -f environment-windows.yml
+conda activate rsas
+python -c "import PyInstaller, RNA, tkinter, customtkinter, pptx; print('ok')"
+python -m pytest -q tests
+```
+
+**4. Build the executable** (this takes a few minutes):
+
+```bat
+python build_app.py
+```
+
+The output should include `Bundling rnarobo binary: bin\windows\rnarobo.exe`, `Bundling knotty binary: bin\windows\knotty.exe`, `Bundling knotty params: ...` and `Build complete!`.
+
+**5. Test it:**
+
+```bat
+dist\RSAS.exe
+```
+
+Check that the About page shows version 4.0.0, that **Load Example → Run** produces results, that the RNAfold Deck creates a PowerPoint file, and that the RNArobo Search and Pseudoknot Finder pages show a green banner. The first start takes a few seconds, because the single-file executable unpacks itself before it starts.
+
+**6. Distribute it.** Rename the file, for example to `RSAS_4.0.0_Windows.exe`, and attach it to the GitHub release (**Releases → Draft a new release** or **Edit**). Do not commit `dist\`; it is excluded by `.gitignore`.
+
+> [!NOTE]
+> The executable is not digitally signed, so Windows SmartScreen shows *"Windows protected your PC"*; users click **More info → Run anyway**. Antivirus programs occasionally flag PyInstaller executables by mistake; such false positives can be reported at <https://www.microsoft.com/wdsi/filesubmission>.
+
 ### 7.2 macOS
 
 **Step 1. Install Python 3.11 or 3.12** from [python.org](https://www.python.org/downloads/macos/). The *universal2* installer runs natively on both Intel and Apple Silicon and includes a working Tk. After installing, double-click **Install Certificates.command** in `/Applications/Python 3.x/`.
@@ -314,6 +360,57 @@ python main.py
 ```
 
 RNArobo and Knotty are bundled for macOS; see [§8.1](#81-macos-bundled) for the one-time setup. If macOS reports that RSAS or one of these programs *is damaged* or *cannot be verified*, see [§7.4](#74-macos-security-warnings-gatekeeper).
+
+#### Building the macOS application
+
+These steps produce `dist/RSAS.app` and the installer `dist/RSAS_macOS.dmg`. The app contains Python, ViennaRNA, RNArobo and Knotty, and needs nothing else on the target Mac. Build it on a Mac: PyInstaller cannot create a macOS application on Windows or Linux. The app runs on Macs of the same processor type as the Mac that built it (Apple Silicon `arm64` or Intel `x86_64`).
+
+**1. Install the tools (once).**
+- **Miniforge:** download the installer for your Mac (Apple Silicon or Intel) from <https://conda-forge.org/download/> and run it, for example `bash Miniforge3-MacOSX-arm64.sh`.
+- **Git:** run `xcode-select --install` in Terminal (Apple Command Line Tools).
+
+**2. Open Terminal and download the project:**
+
+```bash
+cd ~
+git clone https://github.com/RNAThermometer/RSAS.git
+cd RSAS
+```
+
+**3. Create the environment:**
+
+```bash
+conda env create -f environment.yml
+conda activate rsas
+python -c "import PyInstaller, RNA, tkinter, customtkinter, pptx; print('ok')"
+python -m pytest -q tests
+uname -m
+```
+
+`uname -m` prints `arm64` (Apple Silicon) or `x86_64` (Intel): the processor type the app will run on. If `PyInstaller` is missing, run `python -m pip install "pyinstaller>=6.0"`.
+
+**4. Allow the bundled engines and build the app** (this takes a few minutes):
+
+```bash
+xattr -dr com.apple.quarantine bin/macos
+chmod +x bin/macos/rnarobo bin/macos/knotty
+python build_app.py
+```
+
+The output should end with `Ad-hoc codesign successful.`, `Signature verified OK.` and `DMG created: dist/RSAS_macOS.dmg`.
+
+**5. Test it:**
+
+```bash
+open dist/RSAS.app
+```
+
+Check that the About page shows version 4.0.0, that **Load Example → Run** produces results, that the RNAfold Deck creates a PowerPoint file, and that the RNArobo Search and Pseudoknot Finder pages show a green banner. On Apple Silicon these two pages need Rosetta 2, because the bundled engines are Intel builds: `softwareupdate --install-rosetta --agree-to-license`. Then open `dist/RSAS_macOS.dmg` and double-click **Install RSAS.sh**, as a user would.
+
+**6. Distribute it.** Rename the DMG to show the processor type, for example `RSAS_4.0.0_macOS_arm64.dmg` or `RSAS_4.0.0_macOS_intel.dmg`, and attach it to the GitHub release. To support both kinds of Mac, build once on each. Do not commit `dist/`; it is excluded by `.gitignore`.
+
+> [!NOTE]
+> The app is signed ad hoc but not notarized by Apple, so users may see *"RSAS is damaged and can't be opened"*. **Install RSAS.sh** in the DMG removes the quarantine flag; the other solutions are in [§7.4](#74-macos-security-warnings-gatekeeper). Notarization, which removes the warning entirely, requires an Apple Developer account.
 
 ### 7.3 Linux
 
@@ -645,7 +742,7 @@ python -m RnaThermofinder analyze /path/to/input.fasta --out-dir /path/to/result
 
 ## 11. Building a standalone application
 
-A self-contained application, which needs no Python on the target machine, is built with PyInstaller on each target operating system (cross-compilation is not supported):
+A self-contained application, which needs no Python on the target machine, is built with PyInstaller on each target operating system (cross-compilation is not supported). Step-by-step instructions: [Building the Windows executable](#building-the-windows-executable) (§7.1) and [Building the macOS application](#building-the-macos-application) (§7.2). In short:
 
 ```bash
 python -m pip install -r requirements-dev.txt     # adds pytest, setuptools, pyinstaller

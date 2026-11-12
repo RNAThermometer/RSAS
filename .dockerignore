@@ -1,0 +1,10 @@
+.git
+**/__pycache__
+**/*.pyc
+.DS_Store
+build/
+dist/
+*.egg-info/
+Data/Outputs/*
+!Data/Outputs/.gitkeep
+bin/macos/
