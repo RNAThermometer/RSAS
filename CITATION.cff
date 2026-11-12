@@ -16,7 +16,10 @@ abstract: >-
   structured RNA regulatory elements across diverse sequence spaces and is available at https://github.com/RNAThermometer/RSAS.
 type: software
 authors:
-  version: "4.0.0"
+- family-names: "TBD"
+  given-names: "TBD"
+  email:  
+version: "4.0.0"
 date-released: "2026-11-03"
 license: MIT
 repository-code: "https://github.com/RNAThermometer/RSAS"
