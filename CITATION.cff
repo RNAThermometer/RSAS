@@ -4,21 +4,23 @@ cff-version: 1.2.0
 message: "If you use RSAS in your research, please cite it as below."
 title: "RSAS: RNA Structure Analysis Suite"
 abstract: >-
-  A desktop application for finding and characterizing RNA thermometers,
-  riboswitches, and other regulatory structures in bacterial sequences. RSAS
-  folds candidate sequences at multiple temperatures with ViennaRNA, detects the
-  regulatory hairpin and ribosome binding site, measures how sequestered the RBS
-  is as temperature changes, and scores each candidate.
+  Functional RNAs regulate cellular processes through dynamic structures governed by folding thermodynamics.
+  We developed RNA Structure Analysis Suite (RSAS), a modular computational platform for identifying, scoring, 
+  and characterizing RNA secondary structures across sequence datasets. RSAS comprises original modules for thermodynamic analysis,
+  candidate scoring, genome sequence extraction, motif accessibility, and synthetic RNA design. Its primary advance is the
+  integration of these capabilities into a customizable batch analysis and scoring framework that transforms RNA folding predictions
+  into class-specific, motif-guided, and user-weighted workflows. Using RNA thermometers as a benchmark, we derived scoring features
+  from previously validated thermometers, prioritized candidates from an Escherichia coli 5′ UTR dataset and validated seven novel
+  RNA thermometers. Additionally, RSAS identified candidate RNA thermometers in other genomic and metagenomic datasets, as well as
+  candidate HIV-like ribosomal frameshifting elements in viral sequences. RSAS provides a customizable framework for discovering
+  structured RNA regulatory elements across diverse sequence spaces and is available at https://github.com/RNAThermometer/RSAS.
 type: software
 authors:
-  - family-names: Vaknin
-    given-names: Roy
-    email: roycyber13@gmail.com
-version: "4.0.0"
+  version: "4.0.0"
 date-released: "2026-11-03"
 license: MIT
-repository-code: "https://github.com/RoyCyber1/RSAS"
-url: "https://github.com/RoyCyber1/RSAS"
+repository-code: "https://github.com/RNAThermometer/RSAS"
+url: "https://github.com/RNAThermometer/RSAS"
 keywords:
   - RNA thermometer
   - RNA secondary structure
