@@ -2,6 +2,8 @@
 
 This guide covers every supported way to install **RSAS (RNA Structure Analysis Suite) 4.0** on Linux, macOS and Windows: a Conda environment, a Docker image, and native Python installations for each operating system. It also covers the optional RNArobo and Knotty engines, verification, and troubleshooting.
 
+*Versão em português: [INSTALAR.md](INSTALAR.md).*
+
 > [!TIP]
 > **Short version.** Install [Miniforge](https://github.com/conda-forge/miniforge), then run
 > `conda env create -f environment.yml` (Linux/macOS) or `conda env create -f environment-windows.yml` (Windows),
@@ -39,8 +41,8 @@ This guide covers every supported way to install **RSAS (RNA Structure Analysis 
 | **customtkinter 5.x + Tk 8.6** | Desktop interface | PyPI / Bioconda; Tk ships with Python |
 | **numpy, openpyxl, biopython** | Core analysis and Excel output | PyPI / conda-forge |
 | **python-pptx, matplotlib, pillow, lxml** | RNAfold Deck: structure drawings and PowerPoint | PyPI / conda-forge |
-| **RNArobo 2.1.0** *(optional)* | RNArobo Search page (structural motif search) | Bundled for macOS; Linux executable from the authors; source ([§8](#8-optional-engines-rnarobo-and-knotty)) |
-| **Knotty** *(optional)* | Pseudoknot Finder page | Bundled for macOS; build from source elsewhere ([§8](#8-optional-engines-rnarobo-and-knotty)) |
+| **RNArobo 2.1.0** *(optional)* | RNArobo Search page (structural motif search) | Bundled for macOS and Windows; Linux executable from the authors; source ([§8](#8-optional-engines-rnarobo-and-knotty)) |
+| **Knotty** *(optional)* | Pseudoknot Finder page | Bundled for macOS and Windows; build from source on Linux ([§8](#8-optional-engines-rnarobo-and-knotty)) |
 
 RSAS needs **no internet connection and no web browser** at run time. All folding, including the RNAfold Deck structure drawings, is done locally with ViennaRNA. The only exception is the Sequence Extractor's optional *Fetch from NCBI* tab.
 
@@ -48,7 +50,7 @@ RSAS needs **no internet connection and no web browser** at run time. All foldin
 
 | Method | Best for | Desktop GUI | Command line | RNArobo / Knotty |
 |---|---|:---:|:---:|---|
-| **A. Conda** | Most users, on any OS. One command, reproducible | ✅ | ✅ | macOS: bundled. Linux: build. Windows: via WSL2 |
+| **A. Conda** | Most users, on any OS. One command, reproducible | ✅ | ✅ | macOS, Windows: bundled. Linux: download/build |
 | **B. Docker** | Servers, HPC front-ends, pipelines, reproducible batch runs | ⚠️ needs an X server | ✅ | Mount Linux builds into the container |
 | **C. Native (venv + pip)** | Users without Conda, or who manage Python themselves | ✅ | ✅ | Same as Conda |
 
@@ -286,7 +288,7 @@ python -m RnaThermofinder version
 python main.py
 ```
 
-**RNArobo and Knotty on Windows.** Neither engine has a native Windows build. Every other page works natively. For those two pages, run RSAS inside **WSL2** (Ubuntu) by following the [Linux instructions](#73-linux) and [§8.2](#82-linux-and-wsl2). Windows 11 shows Linux GUI applications from WSL2 directly.
+**RNArobo and Knotty on Windows.** Windows builds of both engines are bundled in `bin\windows\` (`rnarobo.exe`, `knotty.exe` and Knotty's `simfold\` parameters), so every page works natively; see [§8.3](#83-windows).
 
 ### 7.2 macOS
 
@@ -477,7 +479,9 @@ docker run --rm -it -v "$PWD/bin/linux":/opt/rsas/bin/linux ... rsas:4.0.0 gui
 
 ### 8.3 Windows
 
-Neither engine has a native Windows build. Run RSAS inside **WSL2** (Ubuntu) for these two pages ([§7.1](#71-windows)) and follow §8.2 inside WSL2. Advanced users who compile `rnarobo.exe` / `knotty.exe` themselves (for example with MSYS2) can place them in `bin\windows\`, with Knotty's `simfold\` folder next to `knotty.exe`.
+Both engines ship for Windows in `bin\windows\`: `rnarobo.exe`, `knotty.exe`, and Knotty's energy parameters in `bin\windows\simfold\`. RSAS finds them automatically; nothing has to be installed. Keep the `simfold\` folder next to `knotty.exe`.
+
+If Windows SmartScreen or an antivirus program blocks `rnarobo.exe` or `knotty.exe`, choose **More info → Run anyway** or allow the file in Windows Security. As an alternative, run RSAS inside **WSL2** (Ubuntu) and follow [§8.2](#82-linux-and-wsl2).
 
 ### 8.4 Building from source (macOS and Linux)
 
@@ -597,7 +601,7 @@ Expected results:
 | 3 | `71 passed` (or more) |
 | 4 | A folder `rsas_check/sample_dataset_<timestamp>/` with `sample_dataset_rna_results.csv`, `…_rna_results.xlsx`, `…_run_log.txt` and `…_run_info.json` |
 
-Finally, start the GUI with `python main.py`. The sidebar should list eight pages: Analyze, Results, Settings, Sequence Extractor, Synthetic Pool, RNArobo Search, Pseudoknot Finder and RNAfold Deck.
+Finally, start the GUI with `python main.py`. The sidebar should list nine pages: Analyze, Results, Settings, Sequence Extractor, Synthetic Pool, RNArobo Search, Pseudoknot Finder, RNAfold Deck and About.
 
 ---
 
@@ -692,7 +696,7 @@ Then delete the RSAS folder. User settings in `~/.rsas/` and results in `~/RSAS/
 | `conda env create` fails on Windows with `viennarna ... does not exist` | `environment.yml` was used on Windows. Use `environment-windows.yml`. |
 | GUI widgets look broken or the theme is wrong | customtkinter 6.x was installed. Run `python -m pip install "customtkinter>=5.2,<6"`. |
 | *RNAfold Deck needs 'pptx'* is shown on the RNAfold Deck page | Deck dependencies are missing. Run `python -m pip install python-pptx matplotlib pillow lxml`, or update the Conda environment. |
-| RNArobo Search / Pseudoknot Finder shows a red "not found" banner | See [§8](#8-optional-engines-rnarobo-and-knotty). On macOS, run the `xattr` and Rosetta commands. On Linux, download RNArobo and build Knotty into `bin/linux/` of your RSAS folder (no administrator rights needed). |
+| RNArobo Search / Pseudoknot Finder shows a red "not found" banner | See [§8](#8-optional-engines-rnarobo-and-knotty). On macOS, run the `xattr` and Rosetta commands. On Windows, check that `bin\windows\` contains `rnarobo.exe`, `knotty.exe` and `simfold\`. On Linux, download RNArobo and build Knotty into `bin/linux/` of your RSAS folder (no administrator rights needed). |
 | macOS: *"RSAS" is damaged and can't be opened* | The app is not damaged; macOS blocks programs that are not notarized by Apple. System Settings → Privacy & Security → **Open Anyway**, or `sudo xattr -cr /Applications/RSAS.app`. All options: [§7.4](#74-macos-security-warnings-gatekeeper). |
 | macOS: *"rnarobo" cannot be opened because the developer cannot be verified* | Run `xattr -dr com.apple.quarantine bin/macos` once in your RSAS folder, or use **Open Anyway** ([§7.4](#74-macos-security-warnings-gatekeeper)). |
 | macOS: `xattr` reports *Operation not permitted* | Give Terminal **Full Disk Access** (System Settings → Privacy & Security), restart Terminal and run the command again ([§7.4](#74-macos-security-warnings-gatekeeper)). |
@@ -711,7 +715,7 @@ If a problem persists, open an issue and attach the output of `python -m RnaTher
 |---|---|
 | `environment.yml`: dependency resolution on linux-64, linux-aarch64, osx-64 and osx-arm64 | ✅ Verified (ViennaRNA 2.7.2, Python 3.11) |
 | `environment-windows.yml`: dependency resolution on win-64; pip wheels available | ✅ Verified |
-| Conda environment on Linux: creation, 71 tests, CLI analysis, RNAfold Deck, GUI start (8 pages) | ✅ Verified |
+| Conda environment on Linux: creation, 71 tests, CLI analysis, RNAfold Deck, GUI start | ✅ Verified |
 | Native venv + pip on Linux (Python 3.12): installation, 71 tests, GUI start, `pip install -e .` commands | ✅ Verified |
 | ViennaRNA PyPI wheels for Windows x64, macOS Intel/Apple Silicon, Linux x86_64/aarch64 (Python 3.10–3.13) | ✅ Verified on PyPI |
 | Native installation run on Windows and macOS hardware | ⏳ To be confirmed by the first user on each platform |

@@ -3,13 +3,12 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('bin/macos/simfold/params', 'bin/simfold/params'), ('Examples/sample_dataset.fasta', 'Examples')]
 binaries = [('bin/macos/rnarobo', 'bin'), ('bin/macos/knotty', 'bin')]
-hiddenimports = ['RNA', 'tkinter', 'customtkinter', 'numpy', 'Bio', 'PIL', 'openpyxl', 'pptx',
-                 'matplotlib.backends.backend_agg']
+hiddenimports = ['RNA', 'tkinter', 'customtkinter', 'numpy', 'Bio', 'PIL', 'openpyxl', 'pptx', 'matplotlib.backends.backend_agg']
+tmp_ret = collect_all('pptx')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('RNA')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('RnaThermofinder')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('pptx')  # slide templates used by python-pptx (RNAfold Deck)
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('customtkinter')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]

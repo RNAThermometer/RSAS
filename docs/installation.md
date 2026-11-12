@@ -1,12 +1,13 @@
 # Installation guide
 
-The installation guide is in [INSTALL.md](../INSTALL.md) at the repository root. It covers Conda, Docker and native
+The installation guide is in [INSTALL.md](../INSTALL.md) at the repository root (Portuguese version:
+[INSTALAR.md](../INSTALAR.md)). It covers Conda, Docker and native
 installations on Windows, macOS and Linux, the optional RNArobo and Knotty engines, verification and
 troubleshooting.
 
 RNArobo and Knotty (needed only by the RNArobo Search and Pseudoknot Finder pages) are installed inside the RSAS
 folder, in `bin/<platform>/`, without administrator rights: download RNArobo's ready-made Linux executable,
-build Knotty from source, or use the macOS builds bundled in `bin/macos/`. Step-by-step commands are in
+build Knotty from source, or use the builds bundled in `bin/macos/` and `bin/windows/`. Step-by-step commands are in
 [INSTALL.md, section 8](../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
 
 On macOS, if RSAS.app or the bundled engines are reported as *damaged* or *cannot be verified*, they are not damaged:

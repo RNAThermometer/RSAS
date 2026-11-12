@@ -1,6 +1,6 @@
 # Instalação rápida (Conda) — RSAS 4.0
 
-O guia completo, em inglês, está em **[INSTALL.md](INSTALL.md)**: Conda, Docker e instalação nativa em Windows, macOS e Linux, RNArobo/Knotty, verificação e solução de problemas.
+O guia completo em português está em **[INSTALAR.md](INSTALAR.md)** (em inglês: [INSTALL.md](INSTALL.md)): Conda, Docker e instalação nativa em Windows, macOS e Linux, RNArobo/Knotty, avisos do macOS, verificação e solução de problemas.
 
 ```bash
 # Linux e macOS (Intel e Apple Silicon)
@@ -16,7 +16,7 @@ python -m RnaThermofinder analyze arquivo.fasta --out-dir resultados   # linha d
 ```
 
 - Cada análise cria a pasta `~/RSAS/<arquivo>_<AAAAMMDD_HHMMSS>/`, e todos os arquivos começam com o nome do FASTA de entrada.
-- RNArobo e Knotty (opcionais; só as páginas RNArobo Search e Pseudoknot Finder precisam deles) são instalados **dentro da pasta do RSAS** (`bin/<plataforma>/`), sem permissão de administrador. No macOS já vêm em `bin/macos/` (rode uma vez `xattr -dr com.apple.quarantine bin/macos`; no Apple Silicon, instale o Rosetta 2). No Windows, use WSL2 e siga os passos do Linux.
+- RNArobo e Knotty (opcionais; só as páginas RNArobo Search e Pseudoknot Finder precisam deles) são instalados **dentro da pasta do RSAS** (`bin/<plataforma>/`), sem permissão de administrador. No macOS já vêm em `bin/macos/` (rode uma vez `xattr -dr com.apple.quarantine bin/macos`; no Apple Silicon, instale o Rosetta 2). No Windows já vêm em `bin\windows\` (`rnarobo.exe`, `knotty.exe` e `simfold\`); se o SmartScreen bloquear, clique em **Mais informações → Executar assim mesmo**.
 
 ### RNArobo e Knotty no Linux e WSL2
 
@@ -44,7 +44,7 @@ cd "$RSAS"
 bin/linux/rnarobo 2>&1 | head -n 5
 ```
 
-Compilação no macOS, RNArobo a partir do código-fonte, Docker e verificação: seção 8 do [INSTALL.md](INSTALL.md#8-optional-engines-rnarobo-and-knotty).
+Compilação no macOS, RNArobo a partir do código-fonte, Docker e verificação: seção 8 do [INSTALAR.md](INSTALAR.md#8-programas-opcionais-rnarobo-e-knotty).
 
 ### macOS: “RSAS está danificado e não pode ser aberto”
 
@@ -76,4 +76,4 @@ O RSAS não é notarizado pela Apple. Por isso o macOS pode bloquear o **RSAS.ap
    codesign --force --sign - bin/macos/rnarobo bin/macos/knotty
    ```
 
-Detalhes em inglês: seção 7.4 do [INSTALL.md](INSTALL.md#74-macos-security-warnings-gatekeeper).
+Detalhes: seção 7.4 do [INSTALAR.md](INSTALAR.md#74-avisos-de-segurança-do-macos-gatekeeper).

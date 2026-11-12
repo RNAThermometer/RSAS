@@ -73,11 +73,11 @@ Pull the region upstream (or downstream) of a genomic feature straight from loca
 
 ### Structural motif search (RNArobo)
 
-Search for *structural* motifs, patterns defined by paired helices and loops rather than a flat string, using the bundled [RNArobo](https://github.com/rampasek/RNArobo) 2.1.0 engine. You build a descriptor from helices (`h`), single-stranded regions (`s`), and relational elements (`r`), each with its own tolerance for mismatches, mispairs, and insertions. There's a preset list and an interactive builder. The `rnarobo` binary ships for macOS; on Linux, download the authors' ready-made executable into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
+Search for *structural* motifs, patterns defined by paired helices and loops rather than a flat string, using the bundled [RNArobo](https://github.com/rampasek/RNArobo) 2.1.0 engine. You build a descriptor from helices (`h`), single-stranded regions (`s`), and relational elements (`r`), each with its own tolerance for mismatches, mispairs, and insertions. There's a preset list and an interactive builder. The `rnarobo` binary ships for macOS and Windows; on Linux, download the authors' ready-made executable into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
 
 ### Pseudoknot prediction (Knotty)
 
-Predict structures that include pseudoknots, the crossing base pairs that ordinary MFE folding can't represent, using the bundled [Knotty](https://github.com/HosnaJabbari/Knotty) engine and its DP09 energy model. You get, per sequence, whether a pseudoknot is present, the predicted structure, and the free energy. From Jabbari et al. (2018), *Bioinformatics* 34(22):3849-3856. Same binary caveat as RNArobo: macOS is bundled; on Linux, build it into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
+Predict structures that include pseudoknots, the crossing base pairs that ordinary MFE folding can't represent, using the bundled [Knotty](https://github.com/HosnaJabbari/Knotty) engine and its DP09 energy model. You get, per sequence, whether a pseudoknot is present, the predicted structure, and the free energy. From Jabbari et al. (2018), *Bioinformatics* 34(22):3849-3856. Same binary caveat as RNArobo: macOS and Windows are bundled; on Linux, build it into `bin/linux/` (see [Optional: RNArobo and Knotty](#optional-rnarobo-and-knotty)).
 
 ### Structure deck (RNAfold Deck)
 
@@ -106,11 +106,11 @@ python main.py                             # desktop application
 python -m RnaThermofinder analyze Examples/sample_dataset.fasta   # or the command line
 ```
 
-Conda, Docker and native installation on Windows, macOS and Linux are covered step by step in **[INSTALL.md](INSTALL.md)**.
+Conda, Docker and native installation on Windows, macOS and Linux are covered step by step in **[INSTALL.md](INSTALL.md)** (in Portuguese: **[INSTALAR.md](INSTALAR.md)**).
 
 ### Optional: RNArobo and Knotty
 
-Only the RNArobo Search and Pseudoknot Finder pages need these external programs; everything else works without them. Both are installed **inside your RSAS folder** (`bin/<platform>/`), so no administrator rights are needed. On macOS they are already bundled in `bin/macos/` (run `xattr -dr com.apple.quarantine bin/macos` once; Apple Silicon also needs Rosetta 2). On Linux and WSL2, from your RSAS folder:
+Only the RNArobo Search and Pseudoknot Finder pages need these external programs; everything else works without them. Both are installed **inside your RSAS folder** (`bin/<platform>/`), so no administrator rights are needed. On macOS they are already bundled in `bin/macos/` (run `xattr -dr com.apple.quarantine bin/macos` once; Apple Silicon also needs Rosetta 2), and on Windows in `bin\windows\`. On Linux and WSL2, from your RSAS folder:
 
 ```bash
 # RNArobo 2.1.0: ready-made Linux executable from its authors (Comenius University in Bratislava)
@@ -129,7 +129,7 @@ cp -R simfold "$RSAS/bin/linux/"            # Knotty's energy parameters, next t
 cd "$RSAS"
 ```
 
-Building from source on macOS, Windows (WSL2), Docker and how to check the engines: [INSTALL.md, section 8](INSTALL.md#8-optional-engines-rnarobo-and-knotty).
+Windows, building from source on macOS, Docker and how to check the engines: [INSTALL.md, section 8](INSTALL.md#8-optional-engines-rnarobo-and-knotty).
 
 ### macOS: "RSAS is damaged and can't be opened"
 
@@ -247,7 +247,7 @@ The build takes a few minutes and bundles Python, the dependencies, and the Vien
 
 ## Documentation
 
-- **[Installation guide](INSTALL.md)** covers Conda, Docker and native installation on Windows, macOS and Linux, the optional RNArobo/Knotty engines, verification, and troubleshooting.
+- **[Installation guide](INSTALL.md)** ([Portuguese: INSTALAR.md](INSTALAR.md)) covers Conda, Docker and native installation on Windows, macOS and Linux, the optional RNArobo/Knotty engines, verification, and troubleshooting.
 - **[Usage guide](docs/usage.md)** walks through the GUI, loading and running, the output formats, the scripting API, and a pile of practical tips.
 - **[Features and tools, in depth](docs/features/README.md)** is one detailed page per feature and tool: every option, what it produces, a worked example, and the gotchas.
 - **[How it works](docs/methods.md)** is the methods document: the folding model, the RBS and hairpin algorithms, how the quality score is computed, what the thermometer signal is, and where the limits are.
@@ -279,11 +279,9 @@ RSAS is MIT-licensed (see [LICENSE.md](LICENSE.md)) and is non-commercial academ
 
 ## Author
 
-Contact:
-Michael M. Abdelsayed: 
-- michael.abdelsayed@csun.edu 
-Luiz Passalacqua: 
-- lmoreirapassalac@ufl.edu
+- Contact:
+- Michael M. Abdelsayed: michael.abdelsayed@csun.edu 
+- Luiz Passalacqua: lmoreirapassalac@ufl.edu
 
 ## Acknowledgments
 

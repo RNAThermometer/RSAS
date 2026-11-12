@@ -114,7 +114,7 @@ The whole feature is a thin wrapper around the `rnarobo` command-line binary; th
 
 2. **Descriptor assembly.** The UI rows are read into `DescriptorSpec` objects (`HelixElement`, `SingleStrandedElement`, `RelationalElement`). `DescriptorSpec.to_descriptor_text()` and `_format_element()` turn those into the exact descriptor-file text shown in the preview, assembling the `mismatches:mispairs[:insertions]` and `pos:neg[:insert_nuc]` field structure per element type. `validate_descriptor()` runs first and catches the common mistakes: empty map, a map token with no spec, a primed single-stranded name, a name whose prefix disagrees with its type, negative tolerances, and the dangerous `N*N`-style flanked wildcard.
 
-3. **Run.** `run_rnarobo()` writes the descriptor to a temporary `.desc` file, builds the command line (`-c` for both strands, `-u` for non-overlapping, `--nratio <value>` when set, then the descriptor path and the sequence file), and calls the binary with `subprocess.run(..., timeout=600)`. The temp descriptor file is always cleaned up afterward.
+3. **Run.** `run_rnarobo()` writes the descriptor to a temporary `.desc` file, builds the command line (`-c` for both strands, `-u` for non-overlapping, `--nratio <value>` when set, then the descriptor path and the sequence file), and calls the binary with `subprocess.run(..., timeout=48 h)`. The temp descriptor file is always cleaned up afterward.
 
 4. **Parse.** `_parse_rnarobo_output()` walks RNArobo's default tabular stdout: it skips the header block, reads each match as a position line plus its pipe-delimited element line, and pulls the total-bases-scanned figure out of the `----- SEARCH DONE -----` footer. The result comes back as an `RNAroboResult` (a list of `RNAroboMatch` plus totals and the raw stdout/stderr and return code).
 
@@ -168,11 +168,11 @@ To restrict the stem to canonical Watson-Crick pairs only (no G-U wobble), chang
 
 ## Limitations and gotchas
 
-- **The `rnarobo` binary ships for macOS only.** The repository bundles a macOS build at `bin/macos/rnarobo`. On Linux, download the ready-made executable published by RNArobo's authors (`https://compbio.fmph.uniba.sk/rnarobo/rnarobo-2.1.0-linux64`) into `bin/linux/rnarobo` of your RSAS folder, or build it from source; on Windows, use WSL2. No administrator rights are needed, and RSAS picks the binary up automatically on the next launch. Commands: [INSTALL.md, section 8](../../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
+- **The `rnarobo` binary ships for macOS and Windows.** The repository bundles `bin/macos/rnarobo` and `bin/windows/rnarobo.exe`. On Linux, download the ready-made executable published by RNArobo's authors (`https://compbio.fmph.uniba.sk/rnarobo/rnarobo-2.1.0-linux64`) into `bin/linux/rnarobo` of your RSAS folder, or build it from source. No administrator rights are needed, and RSAS picks the binary up automatically on the next launch. Commands: [INSTALL.md, section 8](../../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
 - **The name's first letter decides the type, inside RNArobo.** This is an RNArobo design, not an RSAS one. RSAS guards against it, but it is why you cannot name a helix `stem1`, the engine would read the leading `s` and treat it as single-stranded.
 - **Wildcards flanked on both sides hang the engine.** `N*N` (or any `*` with nucleotides before and after it) triggers exponential backtracking in RNArobo. RSAS blocks this at validation time; keep `*` at the start or end of a single-stranded pattern.
 - **The parser expects the default tabular output.** That is why RNArobo's FASTA-output flag (`-f`) is not exposed; turning it on would produce output the result parser cannot read.
-- **Long or pathological searches.** The subprocess call has a 600-second timeout. A very large FASTA combined with a loose descriptor (many mismatches, broad wildcards) can be slow; tighten the descriptor or reduce the input if a search does not return.
+- **Long or pathological searches.** The subprocess call has a 48-hour timeout. A very large FASTA combined with a loose descriptor (many mismatches, broad wildcards) can be slow; tighten the descriptor or reduce the input if a search does not return.
 
 ---
 

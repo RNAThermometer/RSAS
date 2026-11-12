@@ -41,6 +41,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   variable was read by a callback after the `except` block ended).
 
 ### Changed
+- RNArobo searches may run for up to 48 hours (was 10 minutes), and Windows builds of RNArobo and Knotty
+  ship in `bin/windows/` (contributed in pull requests #1 and #2).
 - Minimum Python is 3.10 (the oldest version with ViennaRNA wheels).
 - `python-pptx`, `matplotlib`, `pillow` and `lxml` added to the requirements; the PyInstaller build no longer
   excludes matplotlib and collects python-pptx's templates.

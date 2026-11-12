@@ -263,7 +263,7 @@ MFE gives you one structure, the single most stable one, where every base is eit
 The only built-in is RBS + AUG, but you can build any layout by hand with the Add Segment buttons. If your lab reuses a layout, add it to the `PRESETS` dict in `synthetic_pool_generator.py`.
 
 **RNArobo or Pseudoknot Finder says the engine isn't available.**
-Those tools call external programs that are bundled for macOS (`bin/macos/`). On Linux, download RNArobo's ready-made executable and build Knotty into `bin/linux/` of your RSAS folder (no administrator rights needed); on Windows, use WSL2. Commands: [INSTALL.md, section 8](../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
+Those tools call external programs that are bundled for macOS (`bin/macos/`) and Windows (`bin\windows\`). On Linux, download RNArobo's ready-made executable and build Knotty into `bin/linux/` of your RSAS folder (no administrator rights needed). Commands: [INSTALL.md, section 8](../INSTALL.md#8-optional-engines-rnarobo-and-knotty).
 
 **macOS says RSAS "is damaged and can't be opened".**
 The app is not damaged. RSAS is not notarized by Apple, and macOS blocks such programs when they come from the internet. Click Cancel, then System Settings → Privacy & Security → **Open Anyway**. If that button is missing, run `sudo xattr -cr /Applications/RSAS.app` and try again. All options: [INSTALL.md, section 7.4](../INSTALL.md#74-macos-security-warnings-gatekeeper).
