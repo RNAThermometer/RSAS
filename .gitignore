@@ -48,7 +48,7 @@ Data/Inputs/*.txt
 # Built applications (too large for git)
 *.zip
 *.dmg
-*.exe
+#*.exe
 *.app/
 
 # OS junk
@@ -72,5 +72,5 @@ test_output/
 temp/
 
 # Local engine downloads and builds (see INSTALL.md, section 8)
-bin/linux/Knotty-master/
-bin/linux/rnarobo
+#bin/linux/Knotty-master/
+#bin/linux/rnarobo
