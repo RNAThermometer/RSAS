@@ -152,7 +152,7 @@ def run_knotty(
     sequence: str,
     seq_name: str = "",
     *,
-    timeout: int = 120,
+    timeout: int = 1200000,
     progress_callback: Optional[Callable[[str], None]] = None,
 ) -> KnottyResult:
     """Run Knotty on a single RNA sequence.
@@ -272,7 +272,7 @@ def run_knotty(
 def run_knotty_batch(
     sequences: List[Tuple[str, str]],
     *,
-    timeout: int = 120,
+    timeout: int = 1200000,
     progress_callback: Optional[Callable[[int, int], None]] = None,
     log_callback: Optional[Callable[[str], None]] = None,
     cancel_event: Optional["threading.Event"] = None,
