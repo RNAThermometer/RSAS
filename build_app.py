@@ -78,7 +78,7 @@ def _create_macos_dmg(app_path):
         readme = os.path.join(staging, "README.txt")
         with open(readme, "w") as f:
             f.write(
-                "RSAS — RNA Structure Analysis Suite v3.2\n"
+                "RSAS — RNA Structure Analysis Suite v4.0.0\n"
                 "=========================================\n\n"
                 "QUICK INSTALL\n"
                 "  Double-click 'Install RSAS.sh' to install automatically.\n\n"
@@ -89,8 +89,6 @@ def _create_macos_dmg(app_path):
                 "  Fix it by opening Terminal and running:\n\n"
                 "      xattr -cr /Applications/RSAS.app\n\n"
                 "  Then double-click RSAS from your Applications folder normally.\n\n"
-                "SUPPORT\n"
-                "  https://github.com/RoyCyber1/RSAS\n"
             )
 
         # Build DMG
